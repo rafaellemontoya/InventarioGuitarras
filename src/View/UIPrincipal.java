@@ -6,14 +6,14 @@
 package View;
 
 import Controlador.Inventario;
-import Controlador.Menu;
+import DBManager.SqlFabricante;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -21,10 +21,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import modelo.Especificacion;
 import modelo.Fabricante;
 import modelo.Guitarra;
@@ -47,6 +50,7 @@ public class UIPrincipal implements Runnable{
     private JPanel panelBuscar;
     
     private JList<String> listGuitarras;
+    private JTable tableGuitarras;
     private DefaultListModel viewModel;
     
     private JLabel labelTitulo;
@@ -63,12 +67,12 @@ public class UIPrincipal implements Runnable{
     private JTextField costoNuevo;
     
         //****TAB BUSCAR*****///
-    private JLabel lbFabricanteBus, lbMaderaBus, lbTipoBus, lbModeloBus;
+    private JLabel lbFabricanteBus, lbMaderaBus, lbTipoBus, lbModeloBus,lbResultado;
     private JTextField tfFabricante, tfMadera, tfTipo,tfModelo;
     private JButton btnBuscar;
     private FlowLayout lyBuscar;
     private JLabel lbTituloBuscar;
-    private JList<String> listResBusqueda;
+    private JTable listResBusqueda;
     
     private ArrayList<Guitarra> alGuitarras;
     private ArrayList<Modelo> alModelos;
@@ -76,9 +80,9 @@ public class UIPrincipal implements Runnable{
     private ArrayList<Madera> alMaderas;
     private ArrayList<Tipo> alTipos;
     
-    private String[]s;
+   
     private Inventario inventario;
-    
+    String col[] = {"Id","Fabricante","Modelo", "Madera", "Tipo", "Precio"};
     
     
     public UIPrincipal(Inventario inventario){
@@ -104,9 +108,7 @@ public class UIPrincipal implements Runnable{
   
         listGuitarras = new JList();
         
-        
-        //listGuitarras.add();
-        //listGuitarras.setModel(viewModel);
+        tableGuitarras = new JTable();
         
         mainPanel = new JPanel();
         frame = new JFrame();
@@ -143,8 +145,8 @@ public class UIPrincipal implements Runnable{
         
         btnBuscar = new JButton();
         
-        listResBusqueda = new JList<>();
-        
+        listResBusqueda = new JTable();
+        lbResultado = new JLabel();
         
         
         mainPanel = new JPanel();
@@ -170,10 +172,13 @@ public class UIPrincipal implements Runnable{
         listGuitarras.add(labelTitulo);
         listGuitarras.add(labelTitulo);
         listGuitarras.add(labelTitulo);
+        JScrollPane listScroller = new JScrollPane(tableGuitarras);
+        
+        listScroller.setPreferredSize(new Dimension(250, 80));
         
         panelInventario.add(labelTitulo);
         panelInventario.add(labelTitulo3);
-        panelInventario.add(listGuitarras);
+        panelInventario.add(listScroller);
         
         //******TAB AGREGAR****/
         lbFabricante.setText("Fabricante");
@@ -228,6 +233,7 @@ public class UIPrincipal implements Runnable{
         lbTipoBus.setText("Tipo");
         lbModeloBus.setText("Modelo");
         btnBuscar.setText("Buscar");
+        btnBuscar.addActionListener(new BuscarButtonListener() );
         lbTituloBuscar.setText("Buscar guitarra");
         
         JPanel panelTituloBuscar = new JPanel();
@@ -254,17 +260,22 @@ public class UIPrincipal implements Runnable{
         JPanel panelTituloRes = new JPanel();
         panelTituloRes.setLayout(new FlowLayout());
         
-        JLabel lbResultado = new JLabel();
+        
         lbResultado.setText("Resultados de tu Búsqueda:");
         panelTituloRes.add(lbResultado);
         
         panelBuscar.setLayout(new GridLayout(5,2));
         
+        listResBusqueda.getSelectionModel().addListSelectionListener(new ListListener());
+        JScrollPane listScrollerBusqueda = new JScrollPane(listResBusqueda);
+        
+        listScrollerBusqueda.setPreferredSize(new Dimension(250, 80));
+        
         panelBuscar.add(panelTituloBuscar);
         panelBuscar.add(panelCtnBuscar);
         panelBuscar.add(panelBtnBuscar);
         panelBuscar.add(panelTituloRes);
-        panelBuscar.add(listResBusqueda);
+        panelBuscar.add(listScrollerBusqueda);
 
         
         /**TABS**/
@@ -286,16 +297,26 @@ public class UIPrincipal implements Runnable{
         
     }
     public void refreshList(){
-        DefaultListModel dlm = new DefaultListModel();
+        alGuitarras= inventario.getAlGuitarras();
+        
+
+        DefaultTableModel tableModel = new DefaultTableModel(col, 0);
+                                            // The 0 argument is number rows.
+
+        
     for(Guitarra p : alGuitarras ){
-         dlm.addElement(p.getId()+" "+p.getEspecificaciones().getModelo().getNombre()+" "+p.getEspecificaciones().getFabricante().getNombre());
+        Object [] info = {p.getId(),p.getEspecificaciones().getFabricante().getNombre(),p.getEspecificaciones().getModelo().getNombre(),
+            p.getEspecificaciones().getMadera().getNombre(),p.getEspecificaciones().getTipo().getNombre(),"$"+p.getPrecio()};
+        tableModel.addRow(info);
+                  
     }    
-    if(dlm.isEmpty()){
+    if(alGuitarras.isEmpty()){
         labelTitulo3.setText("Tu inventario está vacío");
     }else{
-        labelTitulo3.setText("Tienes "+ dlm.getSize() +" elementos en tu inventario");
+        labelTitulo3.setText("Tienes "+ alGuitarras.size()+" elementos en tu inventario");
     }
-        listGuitarras.setModel(dlm);
+        
+        tableGuitarras.setModel(tableModel);
         
     }
     public void loadInfo(){
@@ -323,6 +344,44 @@ public class UIPrincipal implements Runnable{
                         
     }
     
+    class BuscarButtonListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ArrayList<Guitarra> alBusqueda = new ArrayList<>();
+            DefaultTableModel tableModel = new DefaultTableModel(col, 0);
+            if (tfFabricante.getText().length()!= 0){
+                
+                alBusqueda = inventario.buscarFabricante(new Fabricante(tfFabricante.getText(),""));
+                
+                
+            }else if(tfMadera.getText().length()!=0){
+                 alBusqueda = inventario.buscarMadera(new Madera(tfMadera.getText(),""));
+                
+            }else if(tfModelo.getText().length()!=0){
+                 alBusqueda = inventario.buscarModelo(new Modelo(tfModelo.getText(),"",""));
+               
+                
+            }else if(tfTipo.getText().length()!=0){
+               alBusqueda = inventario.buscarTipo(new Tipo(tfTipo.getText(),"",""));
+                
+                
+            }
+            if (alBusqueda.isEmpty()){
+                    lbResultado.setText("Resultados de tu Búsqueda: 0 coincidencias");
+                }
+            else{
+                for(Guitarra p : alBusqueda ){
+                     Object [] info = {p.getId(),p.getEspecificaciones().getFabricante().getNombre(),p.getEspecificaciones().getModelo().getNombre(),
+                        p.getEspecificaciones().getMadera().getNombre(),p.getEspecificaciones().getTipo().getNombre(),"$"+p.getPrecio()};
+                    tableModel.addRow(info);
+                }
+                lbResultado.setText("Resultados de tu Búsqueda: "+alBusqueda.size()+" coincidencias");
+                listResBusqueda.setModel(tableModel);
+            }
+        }
+        
+    }
     
     class AddButtonListener implements ActionListener{
 
@@ -349,6 +408,7 @@ public class UIPrincipal implements Runnable{
         @Override
         public void valueChanged(ListSelectionEvent e) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            
         }
         
     }

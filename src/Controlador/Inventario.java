@@ -10,7 +10,6 @@ import DBManager.SqlGuitarras;
 import DBManager.SqlMadera;
 import DBManager.SqlModelo;
 import DBManager.SqlTipo;
-import Singleton.GestorSerie;
 import java.io.Serializable;
 import java.util.ArrayList;
 import modelo.Especificacion;
@@ -25,26 +24,17 @@ import modelo.Tipo;
  * @author Rafa
  */
 public class Inventario  implements Serializable{
-    private ArrayList<Guitarra> alGuitarras;
-    private ArrayList<Fabricante> alFabricantes;
-    private ArrayList<Modelo> alModelos;
-    private ArrayList<Tipo> alTipos;
-    private ArrayList<Madera> sqllMadera;
+
     private SqlFabricante sqlFabricante;
     private SqlMadera sqlMadera;
     private SqlModelo sqlModelo;
     private SqlTipo sqlTipo;
     private SqlGuitarras sqlGuitarras;
-    GestorSerie serie;
+
     
     
     public Inventario(){
-        alGuitarras = new ArrayList();
-        serie = GestorSerie.getInstance();
-        alFabricantes = new ArrayList<>();
-        alModelos = new ArrayList<>();
-        alTipos = new ArrayList<>();
-        sqllMadera = new ArrayList<>();
+
         
         sqlFabricante = new SqlFabricante();
         sqlMadera = new SqlMadera();
@@ -89,15 +79,15 @@ public class Inventario  implements Serializable{
         sqlTipo.add(new Tipo("ELECTRO-ACÚSTICA","EA","EA5"));
     }
     public void createMadera(){
-        sqllMadera.add(new Madera("INDIAN_ROSEWOOD","IN"));
-        sqllMadera.add(new Madera("BRASILIAN_ROSEWOOD","BR"));
-        sqllMadera.add(new Madera("MAHOGANY","MH"));
-        sqllMadera.add(new Madera("MAPLE","MP"));
-        sqllMadera.add(new Madera("COCOBOLO","CO"));
-        sqllMadera.add(new Madera("CEDAR","CE"));
-        sqllMadera.add(new Madera("ADIRONDARK","AD"));
-        sqllMadera.add(new Madera("ALDER","AL"));
-        sqllMadera.add(new Madera("SITKA","SI"));
+        sqlMadera.add(new Madera("INDIAN_ROSEWOOD","IN"));
+        sqlMadera.add(new Madera("BRASILIAN_ROSEWOOD","BR"));
+        sqlMadera.add(new Madera("MAHOGANY","MH"));
+        sqlMadera.add(new Madera("MAPLE","MP"));
+        sqlMadera.add(new Madera("COCOBOLO","CO"));
+        sqlMadera.add(new Madera("CEDAR","CE"));
+        sqlMadera.add(new Madera("ADIRONDARK","AD"));
+        sqlMadera.add(new Madera("ALDER","AL"));
+        sqlMadera.add(new Madera("SITKA","SI"));
         
     }
 
@@ -146,9 +136,47 @@ public class Inventario  implements Serializable{
     public Tipo crearTipo(String nombre, String clave, String descripcion){
         return sqlTipo.add( new Tipo(nombre, clave, descripcion));
     } 
-
+    
+    public ArrayList<Guitarra> buscarFabricante(Fabricante fabricante){
+        ArrayList<Fabricante> fabricantes =sqlFabricante.getFabricantesNombre(fabricante);
+        ArrayList<Guitarra> guitarrasObtenidas = new ArrayList<>();
+        
+        for (Fabricante fabricanteObtenido : fabricantes) {
+            guitarrasObtenidas.addAll( sqlGuitarras.buscarGuitarras(fabricanteObtenido) );
+        }
+        return guitarrasObtenidas;
+    }
+    public ArrayList<Guitarra> buscarMadera(Madera madera){
+        ArrayList<Madera> maderas =sqlMadera.getMaderasNombre(madera);
+        ArrayList<Guitarra> guitarrasObtenidas = new ArrayList<>();
+        
+        for (Madera maderaObtenida : maderas) {
+            guitarrasObtenidas.addAll( sqlGuitarras.buscarGuitarras(maderaObtenida) );
+        }
+        return guitarrasObtenidas;
+    }
 
     
+    public ArrayList<Guitarra> buscarModelo(Modelo modelo){
+        ArrayList<Modelo> modelos =sqlModelo.getModelosNombre(modelo);
+        ArrayList<Guitarra> guitarrasObtenidas = new ArrayList<>();
+        
+        for (Modelo modeloObtenido : modelos) {
+            guitarrasObtenidas.addAll( sqlGuitarras.buscarGuitarras(modeloObtenido) );
+        }
+        return guitarrasObtenidas;
+    }
+    
+        
+    public ArrayList<Guitarra> buscarTipo(Tipo tipo){
+        ArrayList<Tipo> tipos =sqlTipo.getTiposNombre(tipo);
+        ArrayList<Guitarra> guitarrasObtenidas = new ArrayList<>();
+        
+        for (Tipo fabricanteObtenido : tipos) {
+            guitarrasObtenidas.addAll( sqlGuitarras.buscarGuitarras(fabricanteObtenido) );
+        }
+        return guitarrasObtenidas;
+    }
     
         
 }

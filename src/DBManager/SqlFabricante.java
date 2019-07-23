@@ -5,8 +5,7 @@
  */
 package DBManager;
 
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
+import java.sql.CallableStatement;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,8 +34,9 @@ public class SqlFabricante {
             
             
             conn.connect();
-            String query = "INSERT INTO Fabricantes VALUES(0,?,?)";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            String query = "INSERT INTO fabricantes VALUES(0,?,?)";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, fabricante.getNombre());
             statement.setString(2, "" + fabricante.getClave());
             int inserted = statement.executeUpdate();
@@ -67,9 +67,11 @@ public class SqlFabricante {
         try{
             conn.connect();
             fabricantes = new ArrayList<Fabricante>();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
 
             String query = "SELECT * FROM fabricantes";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             while (result.next()) {
                 Fabricante fabricante = new Fabricante("","");
@@ -88,13 +90,14 @@ public class SqlFabricante {
         return fabricantes;
 
     }
-    
     public Fabricante getFabricante (Fabricante fabricante){
         Fabricante fabricanteObtenido = null;
         try {
             conn.connect();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
             String query = "SELECT * FROM fabricantes WHERE id =" + fabricante.getId();
+            CallableStatement statement = (CallableStatement)
+            conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             if (result.next()) {
                 fabricanteObtenido = new Fabricante("","");
@@ -109,12 +112,44 @@ public class SqlFabricante {
         return fabricanteObtenido;
     }
     
+     public ArrayList<Fabricante> getFabricantesNombre(Fabricante fabricanteParam){
+        ArrayList<Fabricante> fabricantes = new ArrayList<Fabricante>();
+        try{
+            conn.connect();
+            fabricantes = new ArrayList<Fabricante>();
+            
+
+            String query = "SELECT * FROM fabricantes WHERE nombre LIKE '"+fabricanteParam.getNombre()+"%'";
+            CallableStatement statement = (CallableStatement)
+            conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Fabricante fabricante = new Fabricante();
+                fabricante.setId(result.getLong("id"));
+                fabricante.setNombre(result.getString("nombre"));
+                fabricante.setClave(result.getString("clave"));
+                
+                fabricantes.add(fabricante);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlFabricante.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return fabricantes;
+
+    }
+    
+    
+    
     public int eliminarFabricante(Fabricante fabricante) {
         int estado = -1;
         try {
             conn.connect();
             String query = "DELETE FROM fabricantes WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setLong(1, fabricante.getId());
             estado = statement.executeUpdate();
         } catch (SQLException ex) {
@@ -130,7 +165,8 @@ public class SqlFabricante {
         try {
             conn.connect();
             String query = "UPDATE fabricantes SET nombre= ?, clave=? WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareCall(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, fabricante.getNombre());
             statement.setString(2, fabricante.getClave());
             statement.setLong(3, fabricante.getId());

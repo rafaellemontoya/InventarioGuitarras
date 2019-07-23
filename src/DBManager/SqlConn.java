@@ -5,10 +5,12 @@
  */
 package DBManager;
 
-import com.mysql.jdbc.Connection;
+import java.sql.DriverManager;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -38,17 +40,19 @@ public class SqlConn {
         String user = configuration.getProperty("user");
         String password = configuration.getProperty("password");
 
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append("jdbc:mysql://");
-        strBuilder.append(host);
-        strBuilder.append(":");
-        strBuilder.append(port);
-        strBuilder.append("/");
-        strBuilder.append(dbName);
-        strBuilder.append("?user=");
-        strBuilder.append(user);
-        strBuilder.append("&password=");
-        strBuilder.append(password);
+                StringBuilder strBuilder = new StringBuilder();
+strBuilder.append("jdbc:mysql://");
+strBuilder.append(host);
+strBuilder.append(":");
+strBuilder.append(port);
+strBuilder.append("/");
+strBuilder.append(dbName);
+strBuilder.append("?user=");
+strBuilder.append(user);
+strBuilder.append("&password=");
+strBuilder.append(password);
+strBuilder.append("&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+
         stringConn = strBuilder.toString();
 
     }
@@ -60,10 +64,10 @@ public class SqlConn {
             conn = (Connection) DriverManager.getConnection(stringConn);
             return true;
         } catch (ClassNotFoundException ex) {
-            //Logger.getLogger(SqlHelperCandidate.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SqlConn.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } catch (SQLException ex) {
-            //Logger.getLogger(SqlHelperCandidate.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SqlConn.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
@@ -74,7 +78,7 @@ public class SqlConn {
             conn.close();
             return true;
         } catch (SQLException ex) {
-            //Logger.getLogger(SqlHelperCandidate.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SqlConn.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }  

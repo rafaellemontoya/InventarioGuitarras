@@ -5,9 +5,9 @@
  */
 package DBManager;
 
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
+
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,10 +36,12 @@ private SqlConn conn;
             
             
             conn.connect();
-            String query = "INSERT INTO Tipos VALUES(0,?,?)";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            String query = "INSERT INTO Tipos VALUES(0,?,?,?)";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, tipo.getNombre());
             statement.setString(2, "" + tipo.getClave());
+            statement.setString(3, "" + tipo.getDescripcion());
             int inserted = statement.executeUpdate();
             if (inserted > 0) {
                 String querySelect = "SELECT * FROM tipos Order by id desc";
@@ -68,12 +70,44 @@ private SqlConn conn;
         try{
             conn.connect();
             tipos = new ArrayList<Tipo>();
-            Statement statement = (Statement) conn.getConn().createStatement();
+           
 
             String query = "SELECT * FROM tipos";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             while (result.next()) {
-                Tipo tipo = new Tipo("","","");
+                Tipo tipo = new Tipo();
+                tipo.setId(result.getLong("id"));
+                tipo.setNombre(result.getString("nombre"));
+                tipo.setClave(result.getString("clave"));
+                
+                tipos.add(tipo);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlTipo.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return tipos;
+
+    }
+    
+     
+    public ArrayList<Tipo> getTiposNombre(Tipo tipoParam){
+        ArrayList<Tipo> tipos = new ArrayList<Tipo>();
+        try{
+            conn.connect();
+            tipos = new ArrayList<Tipo>();
+           
+
+            String query = "SELECT * FROM tipos WHERE nombre LIKE '"+tipoParam.getNombre()+"%'";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Tipo tipo = new Tipo();
                 tipo.setId(result.getLong("id"));
                 tipo.setNombre(result.getString("nombre"));
                 tipo.setClave(result.getString("clave"));
@@ -94,8 +128,10 @@ private SqlConn conn;
         Tipo tipoObtenido = null;
         try {
             conn.connect();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
             String query = "SELECT * FROM tipos WHERE id =" + tipo.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             if (result.next()) {
                 tipoObtenido = new Tipo("","","");
@@ -115,7 +151,8 @@ private SqlConn conn;
         try {
             conn.connect();
             String query = "DELETE FROM tipos WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setLong(1, tipo.getId());
             estado = statement.executeUpdate();
         } catch (SQLException ex) {
@@ -131,7 +168,8 @@ private SqlConn conn;
         try {
             conn.connect();
             String query = "UPDATE tipos SET nombre= ?, clave=? WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareCall(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, tipo.getNombre());
             statement.setString(2, tipo.getClave());
             statement.setLong(3, tipo.getId());

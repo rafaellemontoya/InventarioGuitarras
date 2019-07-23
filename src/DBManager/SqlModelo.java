@@ -5,9 +5,9 @@
  */
 package DBManager;
 
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
+
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -37,7 +37,8 @@ private SqlConn conn;
             
             conn.connect();
             String query = "INSERT INTO Modelos VALUES(0,?,?)";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, modelo.getNombre());
             statement.setString(2, "" + modelo.getClave());
             int inserted = statement.executeUpdate();
@@ -68,12 +69,44 @@ private SqlConn conn;
         try{
             conn.connect();
             modelos = new ArrayList<Modelo>();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
 
             String query = "SELECT * FROM modelos";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             while (result.next()) {
-                Modelo modelo = new Modelo("","","");
+                Modelo modelo = new Modelo();
+                modelo.setId(result.getLong("id"));
+                modelo.setNombre(result.getString("nombre"));
+                modelo.setClave(result.getString("clave"));
+                
+                modelos.add(modelo);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlModelo.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return modelos;
+
+    }
+    
+        
+    public ArrayList<Modelo> getModelosNombre(Modelo modeloParam){
+        ArrayList<Modelo> modelos = new ArrayList<Modelo>();
+        try{
+            conn.connect();
+            modelos = new ArrayList<Modelo>();
+            
+
+            String query = "SELECT * FROM modelos WHERE nombre LIKE '"+modeloParam.getNombre()+"%'";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Modelo modelo = new Modelo();
                 modelo.setId(result.getLong("id"));
                 modelo.setNombre(result.getString("nombre"));
                 modelo.setClave(result.getString("clave"));
@@ -94,8 +127,10 @@ private SqlConn conn;
         Modelo modeloObtenido = null;
         try {
             conn.connect();
-            Statement statement = (Statement) conn.getConn().createStatement();
+           
             String query = "SELECT * FROM modelos WHERE id =" + modelo.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             if (result.next()) {
                 modeloObtenido = new Modelo("","","");
@@ -115,7 +150,8 @@ private SqlConn conn;
         try {
             conn.connect();
             String query = "DELETE FROM modelos WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setLong(1, modelo.getId());
             estado = statement.executeUpdate();
         } catch (SQLException ex) {
@@ -131,7 +167,8 @@ private SqlConn conn;
         try {
             conn.connect();
             String query = "UPDATE modelos SET nombre= ?, clave=? WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareCall(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setString(1, modelo.getNombre());
             statement.setString(2, modelo.getClave());
             statement.setLong(3, modelo.getId());

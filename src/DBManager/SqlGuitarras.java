@@ -5,9 +5,9 @@
  */
 package DBManager;
 
-import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.Statement;
+
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -51,7 +51,8 @@ public class SqlGuitarras {
             
             conn.connect();
             String query = "INSERT INTO guitarras VALUES(0,?,?,?,?,?)";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setFloat(1, guitarra.getPrecio());
             statement.setLong(2, guitarra.getEspecificaciones().getFabricante().getId());
             statement.setLong(3, guitarra.getEspecificaciones().getMadera().getId());
@@ -87,9 +88,189 @@ public class SqlGuitarras {
         try{
             conn.connect();
             guitarras = new ArrayList<Guitarra>();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
 
             String query = "SELECT * FROM guitarras";
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Guitarra guitarra = new Guitarra();
+                guitarra.setId(result.getLong("id"));
+                guitarra.setPrecio(result.getFloat("precio"));
+                
+                Fabricante f = new Fabricante();
+                f.setId(result.getLong("fabricante"));
+                
+                Madera m = new Madera();
+                m.setId(result.getLong("madera"));
+                
+                Modelo mo = new Modelo();
+                mo.setId(result.getLong("modelo"));
+                
+                Tipo t = new Tipo();
+                t.setId(result.getLong("tipo"));
+                
+                Especificacion e = new Especificacion(sqlFabricante.getFabricante(f),
+                        sqlMadera.getMadera(m), sqlModelo.getModelo(mo), sqlTipo.getTipo(t));
+
+                guitarra.setEspecificaciones(e);
+                
+                guitarras.add(guitarra);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlGuitarras.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return guitarras;
+
+    }
+    
+    public ArrayList<Guitarra> buscarGuitarras(Fabricante fabricante){
+        ArrayList<Guitarra> guitarras = new ArrayList<Guitarra>();
+        try{
+            conn.connect();
+            guitarras = new ArrayList<Guitarra>();
+            
+
+            String query = "SELECT * FROM guitarras WHERE fabricante ="+fabricante.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Guitarra guitarra = new Guitarra();
+                guitarra.setId(result.getLong("id"));
+                guitarra.setPrecio(result.getFloat("precio"));
+                
+                Fabricante f = new Fabricante();
+                f.setId(result.getLong("fabricante"));
+                
+                Madera m = new Madera();
+                m.setId(result.getLong("madera"));
+                
+                Modelo mo = new Modelo();
+                mo.setId(result.getLong("modelo"));
+                
+                Tipo t = new Tipo();
+                t.setId(result.getLong("tipo"));
+                
+                Especificacion e = new Especificacion(sqlFabricante.getFabricante(f),
+                        sqlMadera.getMadera(m), sqlModelo.getModelo(mo), sqlTipo.getTipo(t));
+
+                guitarra.setEspecificaciones(e);
+                
+                guitarras.add(guitarra);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlGuitarras.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return guitarras;
+
+    }
+    
+    public ArrayList<Guitarra> buscarGuitarras(Madera madera){
+        ArrayList<Guitarra> guitarras = new ArrayList<Guitarra>();
+        try{
+            conn.connect();
+            guitarras = new ArrayList<Guitarra>();
+            
+
+            String query = "SELECT * FROM guitarras WHERE madera ="+madera.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Guitarra guitarra = new Guitarra();
+                guitarra.setId(result.getLong("id"));
+                guitarra.setPrecio(result.getFloat("precio"));
+                
+                Fabricante f = new Fabricante();
+                f.setId(result.getLong("fabricante"));
+                
+                Madera m = new Madera();
+                m.setId(result.getLong("madera"));
+                
+                Modelo mo = new Modelo();
+                mo.setId(result.getLong("modelo"));
+                
+                Tipo t = new Tipo();
+                t.setId(result.getLong("tipo"));
+                
+                Especificacion e = new Especificacion(sqlFabricante.getFabricante(f),
+                        sqlMadera.getMadera(m), sqlModelo.getModelo(mo), sqlTipo.getTipo(t));
+
+                guitarra.setEspecificaciones(e);
+                
+                guitarras.add(guitarra);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlGuitarras.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return guitarras;
+
+    }
+    public ArrayList<Guitarra> buscarGuitarras(Modelo modelo){
+        ArrayList<Guitarra> guitarras = new ArrayList<Guitarra>();
+        try{
+            conn.connect();
+            guitarras = new ArrayList<Guitarra>();
+            
+
+            String query = "SELECT * FROM guitarras WHERE modelo ="+modelo.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
+            ResultSet result = statement.executeQuery(query);
+            while (result.next()) {
+                Guitarra guitarra = new Guitarra();
+                guitarra.setId(result.getLong("id"));
+                guitarra.setPrecio(result.getFloat("precio"));
+                
+                Fabricante f = new Fabricante();
+                f.setId(result.getLong("fabricante"));
+                
+                Madera m = new Madera();
+                m.setId(result.getLong("madera"));
+                
+                Modelo mo = new Modelo();
+                mo.setId(result.getLong("modelo"));
+                
+                Tipo t = new Tipo();
+                t.setId(result.getLong("tipo"));
+                
+                Especificacion e = new Especificacion(sqlFabricante.getFabricante(f),
+                        sqlMadera.getMadera(m), sqlModelo.getModelo(mo), sqlTipo.getTipo(t));
+
+                guitarra.setEspecificaciones(e);
+                
+                guitarras.add(guitarra);
+                //TODO: Recuperar el registro de la tabla partido para hacer un objeto Party
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SqlGuitarras.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            conn.disconnect();
+        }
+        return guitarras;
+
+    }
+    public ArrayList<Guitarra> buscarGuitarras(Tipo tipo){
+        ArrayList<Guitarra> guitarras = new ArrayList<Guitarra>();
+        try{
+            conn.connect();
+            guitarras = new ArrayList<Guitarra>();
+            
+
+            String query = "SELECT * FROM guitarras WHERE tipo ="+tipo.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             while (result.next()) {
                 Guitarra guitarra = new Guitarra();
@@ -129,8 +310,10 @@ public class SqlGuitarras {
         Guitarra guitarra = null;
         try {
             conn.connect();
-            Statement statement = (Statement) conn.getConn().createStatement();
+            
             String query = "SELECT * FROM guitarras WHERE id =" + guitarraParam.getId();
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             ResultSet result = statement.executeQuery(query);
             if (result.next()) {
                 guitarra.setId(result.getLong("id"));
@@ -167,7 +350,8 @@ public class SqlGuitarras {
         try {
             conn.connect();
             String query = "DELETE FROM guitarras WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareStatement(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setLong(1, guitarra.getId());
             estado = statement.executeUpdate();
         } catch (SQLException ex) {
@@ -183,7 +367,8 @@ public class SqlGuitarras {
         try {
             conn.connect();
             String query = "UPDATE guitarras SET precio= ?, fabricante=?, madera=?, modelo=?, tipo=? WHERE id = ?";
-            PreparedStatement statement = (PreparedStatement) conn.getConn().prepareCall(query);
+            CallableStatement statement = (CallableStatement)
+conn.getConn().prepareCall(query);
             statement.setFloat(0, guitarra.getPrecio());
             statement.setLong(1, guitarra.getEspecificaciones().getFabricante().getId());
             statement.setLong(2, guitarra.getEspecificaciones().getMadera().getId());

@@ -6,7 +6,6 @@
 package inventarioguitarras;
 
 import Controlador.Inventario;
-import Controlador.Menu;
 import View.UIPrincipal;
 
 /**
@@ -21,14 +20,10 @@ public class InventarioGuitarras {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        Menu menu = new Menu();
+      
         
-        Inventario inventario = menu.getInventario();
-        if (inventario != null){
-            inventario.getAlGuitarras();
-        }else{
-            inventario = new Inventario();
-        }
+        Inventario inventario = new Inventario();
+        
 
         
         
